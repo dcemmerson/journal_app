@@ -61,8 +61,6 @@ class _DefaultScaffoldState extends State<DefaultScaffold> {
             themeController: themeController,
             toggleDarkMode: toggleDarkMode,
           ),
-
-          // This trailing comma makes auto-formatting nicer for build methods.
         ));
   }
 }
