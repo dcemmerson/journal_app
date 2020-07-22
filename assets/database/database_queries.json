@@ -1,0 +1,5 @@
+{
+    "createDatabase": "CREATE TABLE IF NOT EXISTS journalEntries(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, body TEXT NOT NULL, rating INTEGER NOT NULL, date TEXT NOT NULL);",
+    "selectAllEntries": "SELECT * FROM journalEntries",
+    "inertEntry": "INSERT INTO journalEntries (title, body, rating, date) VALUES (?, ?, ?, ?);"
+}
