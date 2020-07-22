@@ -22,21 +22,26 @@ class _DefaultScaffoldState extends State<DefaultScaffold> {
   void initState() {
     super.initState();
     themeController = ThemeController(darkMode: darkMode);
+    initThemeFlavor();
   }
 
-  // void persistThemeFlavor() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   this.darkMode = prefs.getBool(darkMode) ?? false;
-  // }
+  void persistThemeFlavor(bool isDarkMode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('darkMode', isDarkMode);
+  }
 
-  // bool getThemeFlavor() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   prefs.getBool('darkMode') ==  ? true : false;
-  //   return true;
-  // }
+  void initThemeFlavor() async {
+    print('initing theme');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    print('setting them to ');
+    print(prefs.getBool('darkMode'));
+    setState(() =>
+        themeController = ThemeController(darkMode: prefs.getBool('darkMode')));
+  }
 
   void toggleDarkMode() => setState(() {
         themeController = ThemeController(darkMode: !themeController.darkMode);
+        persistThemeFlavor(themeController.darkMode);
       });
 
   AppBar buildAppBar() {

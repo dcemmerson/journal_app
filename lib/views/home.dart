@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:journal/views/default_scaffold.dart';
 
 import 'journal_entries.dart';
-import 'views/default_scaffold.dart';
 
 class Home extends StatelessWidget {
   static const route = 'home';
@@ -14,7 +14,7 @@ class Home extends StatelessWidget {
         child: Container(
             child: Center(
                 child: RaisedButton(
-          child: Text('start a journal entry'),
+          child: Icon(Icons.portrait),
           onPressed: () {
             Navigator.pushNamed(context, JournalEntries.route);
           },

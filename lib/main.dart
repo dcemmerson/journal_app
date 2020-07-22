@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
-
-import 'routes/home.dart';
-import 'routes/journal_entries.dart';
+import 'package:journal/routes/routes.dart';
+import 'package:journal/views/home.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  static final routes = {
-    Home.route: (context) => Home(),
-    JournalEntries.route: (context) => JournalEntries(),
-  };
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -23,7 +17,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
 //      home: MyHomePage(title: 'Flutter Demo Home Page'),
-      routes: routes,
+      routes: Routes.routes,
       initialRoute: Home.route,
     );
   }

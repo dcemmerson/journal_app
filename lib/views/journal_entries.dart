@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:journal/views/default_scaffold.dart';
 
 import 'home.dart';
-import 'views/default_scaffold.dart';
 
 class JournalEntries extends StatelessWidget {
   static const route = 'journal_entries';
