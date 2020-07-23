@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:journal/routes/routes.dart';
-import 'package:journal/views/home.dart';
+import 'package:journal/views/journal.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
 }
 
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       ),
 //      home: MyHomePage(title: 'Flutter Demo Home Page'),
       routes: Routes.routes,
-      initialRoute: Home.route,
+      initialRoute: Journal.route,
     );
   }
 }

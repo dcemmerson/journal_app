@@ -8,6 +8,7 @@ class JsonReader {
   ///               in Resume class.
   static Future<Map<String, String>> read(String fileUri) {
     print('read file');
+    print(fileUri);
     return Future<Map<String, String>>(() {
       return rootBundle.loadString(fileUri).then(jsonDecode).then((decoded) {
         return decoded.cast<String, String>();

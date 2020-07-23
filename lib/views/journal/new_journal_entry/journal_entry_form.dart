@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:journal/database/journal_database_controller.dart';
 import 'package:journal/database/journal_database_interactions.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/views/default_scaffold.dart';
@@ -20,8 +21,8 @@ class JournalEntryForm extends StatefulWidget {
 }
 
 class _JournalEntryFormState extends State<JournalEntryForm> {
-  JournalDatabaseInteractions journalDatabaseInteractions;
   JournalDatabaseTransfer journalDatabaseTransfer = JournalDatabaseTransfer();
+  bool errorSaving = false;
 
   Widget buildForm() {
     return SingleChildScrollView(
@@ -82,13 +83,11 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   }
 
   Widget cancelButton() {
-    return Builder(builder: (BuildContext ctx) {
-      return RaisedButton(
-          child: Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(context);
-          });
-    });
+    return RaisedButton(
+        child: Text('Cancel'),
+        onPressed: () {
+          Navigator.pop(context);
+        });
   }
 
   Widget saveButton() {
@@ -105,10 +104,19 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   /// Save and validation related
   void saveEntry(BuildContext ctx) async {
-    Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
-    widget._formKey.currentState.save();
-    await journalDatabaseInteractions.saveJournalEntry(journalDatabaseTransfer);
-    Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saved!')));
+    try {
+      Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
+      widget._formKey.currentState.save();
+      await JournalDatabaseController.getInstance()
+          .insertJournalEntry(journalDatabaseTransfer);
+      Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saved!')));
+      Navigator.pop(ctx);
+    } catch (err) {
+      print(err);
+      setState(() {
+        errorSaving = true;
+      })
+    }
   }
 
   String emptyStringValidator(String value, String fieldName) {
@@ -136,8 +144,6 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   @override
   Widget build(BuildContext context) {
-    journalDatabaseInteractions = ModalRoute.of(context).settings.arguments;
-
     return DefaultScaffold(title: widget.pageTitle, child: buildForm());
   }
 }
