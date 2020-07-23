@@ -1,5 +1,5 @@
 import 'package:journal/views/home.dart';
-import 'package:journal/views/journal/journal_entry_form.dart';
+import 'package:journal/views/journal/new_journal_entry/journal_entry_form.dart';
 import 'package:journal/views/journal_entries.dart';
 
 class Routes {

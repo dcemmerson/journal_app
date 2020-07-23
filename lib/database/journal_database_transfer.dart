@@ -19,8 +19,9 @@ class JournalDatabaseTransfer {
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       'title': title,
+      'body': body,
       'rating': rating,
-      'date': date,
+      'date': DateTime.now().toString(),
     };
     if (id != null) {
       map['id'] = id;

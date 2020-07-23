@@ -9,8 +9,10 @@ bool darkMode = false;
 class DefaultScaffold extends StatefulWidget {
   final String title;
   final Widget child;
+  final Widget floatingActionButton;
 
-  DefaultScaffold({@required this.title, @required this.child});
+  DefaultScaffold(
+      {@required this.title, @required this.child, this.floatingActionButton});
 
   @override
   _DefaultScaffoldState createState() => _DefaultScaffoldState();
@@ -55,12 +57,13 @@ class _DefaultScaffoldState extends State<DefaultScaffold> {
     return Theme(
         data: themeController.themeData,
         child: Scaffold(
-          appBar: buildAppBar(),
-          body: widget.child,
-          endDrawer: ThemeDrawer(
-            themeController: themeController,
-            toggleDarkMode: toggleDarkMode,
-          ),
-        ));
+            appBar: buildAppBar(),
+            body: widget.child,
+            endDrawer: ThemeDrawer(
+              themeController: themeController,
+              toggleDarkMode: toggleDarkMode,
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            floatingActionButton: widget.floatingActionButton));
   }
 }

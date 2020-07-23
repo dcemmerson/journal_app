@@ -29,8 +29,6 @@ class JournalDatabaseController {
     print(dbQueries);
   }
 
-  Future<void> createIfNotExists() {}
-
   Future<void> openDb() async {
     db = await openDatabase(filename, version: 1,
         onCreate: (Database db, int version) async {
@@ -58,5 +56,6 @@ class JournalDatabaseController {
   Future<JournalDatabaseTransfer> insertJournalEntry(
       JournalDatabaseTransfer jdt) async {
     jdt.id = await db.insert(_tableName, jdt.toMap());
+    return jdt;
   }
 }

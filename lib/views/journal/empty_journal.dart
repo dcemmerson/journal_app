@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:journal/views/journal/journal_entry_form.dart';
+import 'package:journal/database/journal_database_interactions.dart';
+import 'package:journal/views/journal/new_journal_entry/journal_entry_form.dart';
 
 class EmptyJournal extends StatelessWidget {
-  void createNewEntry(BuildContext context) {
-    Navigator.pushNamed(context, JournalEntryForm.route);
-  }
+  final JournalDatabaseInteractions journalDatabaseInteractions;
+  final Function(BuildContext) createNewEntry;
+  EmptyJournal(
+      {@required this.journalDatabaseInteractions,
+      @required this.createNewEntry});
 
   Widget textRow() {
     return Padding(
