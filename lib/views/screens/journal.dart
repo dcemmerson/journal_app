@@ -76,13 +76,18 @@ class _JournalState extends State<Journal> {
     }
   }
 
-  void goToJournalEntryScreen() async {
-    List<Map<String, dynamic>> updatedJournalEntries =
-        await Routes.createNewEntry(context);
+  Future<JournalDatabaseTransfer> goToJournalEntryScreen() async {
+    JournalDatabaseTransfer journalEntry = await Routes.createNewEntry(context);
 
-    if (updatedJournalEntries != null) {
-      setState(() => journalEntries = updatedJournalEntries);
-    }
+    return journalEntry;
+  }
+
+  Future<JournalDatabaseTransfer> goToJournalUpdateScreen(
+      JournalDatabaseTransfer jdt) async {
+    JournalDatabaseTransfer journalEntry =
+        await Routes.updateEntry(context, jdt);
+
+    return journalEntry;
   }
 
   void goToDetailView(BuildContext context, int index) {
@@ -116,18 +121,31 @@ class _JournalState extends State<Journal> {
     ]);
   }
 
-  void handleDismissedItem(int journalEntryId) async {
-    List<Map<String, dynamic>> updatedJournal = List.from(journalEntries);
+  void handleDismissedItem(
+      DismissDirection direction, JournalDatabaseTransfer jdt) async {
+    try {
+      List<Map<String, dynamic>> updatedJournal = List.from(journalEntries);
 
-    print('before');
-    print(updatedJournal);
-    updatedJournal
-        .removeWhere((entry) => (entry['id'] == journalEntryId) ? true : false);
-    print('after');
+      //Remove from widget tree otherwise ListView will throw error.
+      updatedJournal
+          .removeWhere((entry) => (entry['id'] == jdt.id) ? true : false);
+      setState(() => journalEntries = updatedJournal);
 
-    print(updatedJournal);
-    setState(() => journalEntries = updatedJournal);
-    await journalDatabaseController.deleteJournalEntry(journalEntryId);
+      //Now decide if we are deleting or updating.
+      if (direction == DismissDirection.startToEnd) {
+        await journalDatabaseController.deleteJournalEntry(jdt.id);
+      } else {
+        //JournalDatabaseTransfer updatedEntry =
+        await goToJournalUpdateScreen(jdt);
+        List<Map<String, dynamic>> updatedEntries =
+            await journalDatabaseController.getAllJournalEntries();
+
+        setState(() => journalEntries = updatedEntries);
+      }
+    } catch (err) {
+      print(err);
+      setState(() => loadJournalError = true);
+    }
   }
 
   Widget listView(Function onTapCallback) {
@@ -141,9 +159,20 @@ class _JournalState extends State<Journal> {
           itemBuilder: (_, index) {
             return Dismissible(
                 key: ValueKey(journalEntries[index]['id']),
-                background: Container(color: Colors.red),
-                onDismissed: (direction) =>
-                    handleDismissedItem(journalEntries[index]['id']),
+                background: Container(
+                    alignment: Alignment.centerLeft,
+                    color: Colors.red,
+                    child: Padding(
+                        padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                        child: Icon(Icons.delete_forever))),
+                secondaryBackground: Container(
+                    alignment: Alignment.centerRight,
+                    color: Colors.green,
+                    child: Padding(
+                        padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                        child: Icon(Icons.edit))),
+                onDismissed: (direction) => handleDismissedItem(direction,
+                    JournalDatabaseTransfer.fromMap(journalEntries[index])),
                 child: ListTile(
                   leading: Icon(Icons.arrow_forward_ios),
                   trailing: Text(journalEntries[index]['rating'].toString() +
@@ -158,6 +187,16 @@ class _JournalState extends State<Journal> {
         ));
   }
 
+  void handleFloatingButtonAddEntry() async {
+    JournalDatabaseTransfer returnedEntry = await goToJournalEntryScreen();
+
+    if (returnedEntry != null) {
+      List<Map<String, dynamic>> updatedJournalEntries =
+          await journalDatabaseController.getAllJournalEntries();
+      setState(() => journalEntries = updatedJournalEntries);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultScaffold(
@@ -165,7 +204,7 @@ class _JournalState extends State<Journal> {
       child: shouldDisplayLoadingOrJournal(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: goToJournalEntryScreen,
+        onPressed: handleFloatingButtonAddEntry,
       ),
     );
   }

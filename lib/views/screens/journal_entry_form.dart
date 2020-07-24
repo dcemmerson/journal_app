@@ -9,6 +9,8 @@ class JournalEntryForm extends StatefulWidget {
 
   static const route = 'journalentryform';
 
+  final JournalDatabaseTransfer previousJdt;
+
   final String pageTitle;
   final double paddingLeft = 20;
   final double paddingTop = 10;
@@ -17,7 +19,7 @@ class JournalEntryForm extends StatefulWidget {
 
   final _formKey = GlobalKey<FormState>();
 
-  JournalEntryForm({this.pageTitle: 'New Journal Entry'});
+  JournalEntryForm({this.pageTitle: 'New Journal Entry', this.previousJdt});
 
   @override
   _JournalEntryFormState createState() => _JournalEntryFormState();
@@ -28,6 +30,8 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   bool errorSaving = false;
 
   Widget buildForm() {
+    print('previous jdt');
+    print(widget.previousJdt);
     return SingleChildScrollView(
         child: Form(
             key: widget._formKey,
@@ -43,6 +47,8 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         child: TextFormField(
           decoration:
               InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
+          initialValue:
+              widget.previousJdt != null ? widget.previousJdt.title : '',
           validator: (value) => emptyStringValidator(value, 'title'),
           onSaved: (value) => journalDatabaseTransfer.title = value,
         ));
@@ -55,6 +61,8 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         child: TextFormField(
           decoration: InputDecoration(
               labelText: 'Review', border: OutlineInputBorder()),
+          initialValue:
+              widget.previousJdt != null ? widget.previousJdt.body : '',
           minLines: 2,
           maxLines: 4,
           validator: (value) => emptyStringValidator(value, 'body'),
@@ -69,6 +77,9 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         child: TextFormField(
           decoration: InputDecoration(
               labelText: 'Rating', border: OutlineInputBorder()),
+          initialValue: widget.previousJdt != null
+              ? widget.previousJdt.rating.toString()
+              : '',
           validator: (value) => intValidator(value, 'rating',
               JournalEntryForm.minRating, JournalEntryForm.maxRating),
           onSaved: (value) => journalDatabaseTransfer.rating = int.parse(value),
@@ -95,21 +106,31 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
           child: Text('Save'),
           onPressed: () {
             if (widget._formKey.currentState.validate()) {
-              saveEntry(ctx);
+              persistEntry(ctx);
             }
           });
     });
   }
 
-  /// Save and validation related
-  void saveEntry(BuildContext ctx) async {
+  /// Save/update and validation related
+  void persistEntry(BuildContext ctx) async {
     try {
       JournalDatabaseController jdc = JournalDatabaseController.getInstance();
-      Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
       widget._formKey.currentState.save();
-      await jdc.insertJournalEntry(journalDatabaseTransfer);
-      Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saved!')));
-      Navigator.pop(ctx, await jdc.getAllJournalEntries());
+      if (widget.previousJdt != null) {
+        // Then this entry exists in db and we are updating
+        Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updating')));
+        await jdc.updateJournalEntry(
+            widget.previousJdt.id, journalDatabaseTransfer);
+        Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updated!')));
+      } else {
+        // Else new entry we need to insert into db.
+        Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
+        await jdc.insertJournalEntry(journalDatabaseTransfer);
+        Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saved!')));
+      }
+
+      Navigator.pop(ctx, journalDatabaseTransfer);
     } catch (err) {
       print(err);
       setState(() {

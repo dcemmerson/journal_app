@@ -66,4 +66,8 @@ class JournalDatabaseController {
   Future<void> deleteJournalEntry(int id) async {
     await _db.delete(_tableName, where: 'id=?', whereArgs: [id]);
   }
+
+  Future<void> updateJournalEntry(int id, JournalDatabaseTransfer jdt) async {
+    await _db.update(_tableName, jdt.toMap(), where: 'id=?', whereArgs: [id]);
+  }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:journal/routes/routes.dart';
 
 class EmptyJournal extends StatelessWidget {
   final Function createNewEntry;
