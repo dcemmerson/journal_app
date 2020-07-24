@@ -13,7 +13,7 @@ class JournalDatabaseTransfer {
     title = map['title'];
     body = map['body'];
     rating = map['rating'];
-    date = map['date'];
+    date = DateTime.parse(map['date']);
   }
 
   Map<String, dynamic> toMap() {

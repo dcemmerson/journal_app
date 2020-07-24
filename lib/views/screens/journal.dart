@@ -55,6 +55,15 @@ class _JournalState extends State<Journal> {
     }
   }
 
+  void goToJournalEntryScreen() async {
+    List<Map<String, dynamic>> updatedJournalEntries =
+        await Routes.createNewEntry(context);
+
+    if (updatedJournalEntries != null) {
+      setState(() => journalEntries = updatedJournalEntries);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultScaffold(
@@ -62,7 +71,7 @@ class _JournalState extends State<Journal> {
       child: shouldDisplayLoadingOrJournal(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () => Routes.createNewEntry(context),
+        onPressed: goToJournalEntryScreen,
       ),
     );
   }

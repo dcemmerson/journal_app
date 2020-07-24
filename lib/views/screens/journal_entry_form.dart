@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:journal/database/journal_database_controller.dart';
-import 'package:journal/database/journal_database_interactions.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/views/default_scaffold.dart';
 
 class JournalEntryForm extends StatefulWidget {
+  static const minRating = 1;
+  static const maxRating = 5;
+
   static const route = 'journalentryform';
+
   final String pageTitle;
   final double paddingLeft = 20;
   final double paddingTop = 10;
@@ -105,17 +108,17 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   /// Save and validation related
   void saveEntry(BuildContext ctx) async {
     try {
+      JournalDatabaseController jdc = JournalDatabaseController.getInstance();
       Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
       widget._formKey.currentState.save();
-      await JournalDatabaseController.getInstance()
-          .insertJournalEntry(journalDatabaseTransfer);
+      await jdc.insertJournalEntry(journalDatabaseTransfer);
       Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saved!')));
-      Navigator.pop(ctx);
+      Navigator.pop(ctx, await jdc.getAllJournalEntries());
     } catch (err) {
       print(err);
       setState(() {
         errorSaving = true;
-      })
+      });
     }
   }
 
@@ -128,7 +131,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   String emptyIntValidator(String value, String fieldName) {
     if (value.isEmpty || !_isInteger(value)) {
-      return 'Please enter valid $fieldName (1-10)';
+      return 'Please enter valid $fieldName (${JournalEntryForm.minRating} - ${JournalEntryForm.maxRating})';
     }
     return null;
   }

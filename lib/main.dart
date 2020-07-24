@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:journal/routes/routes.dart';
-import 'package:journal/views/journal.dart';
+import 'package:journal/views/screens/journal.dart';
 
 void main() async {
   runApp(MyApp());

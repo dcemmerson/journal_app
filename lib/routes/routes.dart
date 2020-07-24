@@ -10,7 +10,7 @@ class Routes {
     JournalEntryForm.route: (context) => JournalEntryForm(),
   };
 
-  static void createNewEntry(BuildContext context) {
-    Navigator.pushNamed(context, JournalEntryForm.route);
+  static Future createNewEntry(BuildContext context) {
+    return Navigator.pushNamed(context, JournalEntryForm.route);
   }
 }
