@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:journal/routes/routes.dart';
 
 class EmptyJournal extends StatelessWidget {
+  final Function createNewEntry;
+  EmptyJournal({this.createNewEntry});
+
   Widget textRow() {
     return Padding(
         padding: EdgeInsets.all(20),
@@ -15,8 +18,7 @@ class EmptyJournal extends StatelessWidget {
         padding: EdgeInsets.all(20),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           RaisedButton(
-              onPressed: () => Routes.createNewEntry(context),
-              child: Text('Add your first entry!'))
+              onPressed: createNewEntry, child: Text('Add your first entry!'))
         ]));
   }
 

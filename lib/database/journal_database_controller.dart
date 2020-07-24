@@ -62,4 +62,8 @@ class JournalDatabaseController {
     jdt.id = await _db.insert(_tableName, jdt.toMap());
     return jdt;
   }
+
+  Future<void> deleteJournalEntry(int id) async {
+    await _db.delete(_tableName, where: 'id=?', whereArgs: [id]);
+  }
 }

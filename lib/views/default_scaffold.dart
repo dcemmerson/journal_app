@@ -33,10 +33,7 @@ class _DefaultScaffoldState extends State<DefaultScaffold> {
   }
 
   void initThemeFlavor() async {
-    print('initing theme');
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('setting them to ');
-    print(prefs.getBool('darkMode'));
     setState(() =>
         themeController = ThemeController(darkMode: prefs.getBool('darkMode')));
   }

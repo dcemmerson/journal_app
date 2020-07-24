@@ -32,12 +32,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         child: Form(
             key: widget._formKey,
             child: Column(
-              children: <Widget>[
-                titleField(),
-                bodyField(),
-                ratingField(),
-                buttonRow()
-              ],
+              children: [titleField(), bodyField(), ratingField(), buttonRow()],
             )));
   }
 
@@ -74,7 +69,8 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         child: TextFormField(
           decoration: InputDecoration(
               labelText: 'Rating', border: OutlineInputBorder()),
-          validator: (value) => emptyIntValidator(value, 'rating'),
+          validator: (value) => intValidator(value, 'rating',
+              JournalEntryForm.minRating, JournalEntryForm.maxRating),
           onSaved: (value) => journalDatabaseTransfer.rating = int.parse(value),
         ));
   }
@@ -129,8 +125,11 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
     return null;
   }
 
-  String emptyIntValidator(String value, String fieldName) {
-    if (value.isEmpty || !_isInteger(value)) {
+  String intValidator(String value, String fieldName, int min, int max) {
+    if (value.isEmpty ||
+        !_isInteger(value) ||
+        int.parse(value) < min ||
+        int.parse(value) > max) {
       return 'Please enter valid $fieldName (${JournalEntryForm.minRating} - ${JournalEntryForm.maxRating})';
     }
     return null;
