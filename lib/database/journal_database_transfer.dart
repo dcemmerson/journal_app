@@ -2,7 +2,7 @@ class JournalDatabaseTransfer {
   int id;
   String title;
   String body;
-  int rating;
+  double rating;
   DateTime date;
 
   JournalDatabaseTransfer(
@@ -12,7 +12,7 @@ class JournalDatabaseTransfer {
     id = map['id'];
     title = map['title'];
     body = map['body'];
-    rating = map['rating'];
+    rating = map['rating'].toDouble();
     date = DateTime.parse(map['date']);
   }
 
@@ -20,7 +20,7 @@ class JournalDatabaseTransfer {
     var map = <String, dynamic>{
       'title': title,
       'body': body,
-      'rating': rating,
+      'rating': rating.toDouble(),
       'date': DateTime.now().toString(),
     };
     if (id != null) {

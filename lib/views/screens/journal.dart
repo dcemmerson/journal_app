@@ -24,7 +24,7 @@ class _JournalState extends State<Journal> {
   bool loading = true;
   bool loadJournalError = false;
   int selectedJournalIndex = 0;
-  List<Map<String, dynamic>> journalEntries;
+  List<JournalDatabaseTransfer> journalEntries;
   JournalDatabaseController journalDatabaseController;
 
   // JournalDatabaseInteractions journalDatabaseInteractions;
@@ -68,7 +68,7 @@ class _JournalState extends State<Journal> {
     try {
       JournalDatabaseController jdc = JournalDatabaseController.getInstance();
       await jdc.deleteJournalEntry(journalEntryId);
-      List<Map> updatedJournalEntries =
+      List<JournalDatabaseTransfer> updatedJournalEntries =
           await journalDatabaseController.getAllJournalEntries();
       setState(() => journalEntries = updatedJournalEntries);
     } catch (err) {
@@ -92,9 +92,7 @@ class _JournalState extends State<Journal> {
 
   void goToDetailView(BuildContext context, int index) {
     setSelectedJournalIndex(index);
-    JournalDatabaseTransfer journalEntry =
-        JournalDatabaseTransfer.fromMap(journalEntries[index]);
-    Routes.journalDetailView(context, journalEntry: journalEntry);
+    Routes.journalDetailView(context, journalEntry: journalEntries[index]);
   }
 
   Widget chooseIfMasterDetailView() {
@@ -115,20 +113,18 @@ class _JournalState extends State<Journal> {
 
   Widget detailView() {
     return Column(children: [
-      JournalEntryDetail(
-          journalEntry: JournalDatabaseTransfer.fromMap(
-              journalEntries[selectedJournalIndex]))
+      JournalEntryDetail(journalEntry: journalEntries[selectedJournalIndex])
     ]);
   }
 
   void handleDismissedItem(
       DismissDirection direction, JournalDatabaseTransfer jdt) async {
     try {
-      List<Map<String, dynamic>> updatedJournal = List.from(journalEntries);
+      List<JournalDatabaseTransfer> updatedJournal = List.from(journalEntries);
 
       //Remove from widget tree otherwise ListView will throw error.
       updatedJournal
-          .removeWhere((entry) => (entry['id'] == jdt.id) ? true : false);
+          .removeWhere((entry) => (entry.id == jdt.id) ? true : false);
       setState(() => journalEntries = updatedJournal);
 
       //Now decide if we are deleting or updating.
@@ -137,7 +133,7 @@ class _JournalState extends State<Journal> {
       } else {
         //JournalDatabaseTransfer updatedEntry =
         await goToJournalUpdateScreen(jdt);
-        List<Map<String, dynamic>> updatedEntries =
+        List<JournalDatabaseTransfer> updatedEntries =
             await journalDatabaseController.getAllJournalEntries();
 
         setState(() => journalEntries = updatedEntries);
@@ -158,7 +154,7 @@ class _JournalState extends State<Journal> {
           separatorBuilder: (_, __) => Divider(),
           itemBuilder: (_, index) {
             return Dismissible(
-                key: ValueKey(journalEntries[index]['id']),
+                key: ValueKey(journalEntries[index].id),
                 background: Container(
                     alignment: Alignment.centerLeft,
                     color: Colors.red,
@@ -171,16 +167,17 @@ class _JournalState extends State<Journal> {
                     child: Padding(
                         padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
                         child: Icon(Icons.edit))),
-                onDismissed: (direction) => handleDismissedItem(direction,
-                    JournalDatabaseTransfer.fromMap(journalEntries[index])),
+                onDismissed: (direction) =>
+                    handleDismissedItem(direction, journalEntries[index]),
                 child: ListTile(
                   leading: Icon(Icons.arrow_forward_ios),
-                  trailing: Text(journalEntries[index]['rating'].toString() +
-                      ' / ' +
-                      JournalEntryForm.maxRating.toString()),
-                  title: Text(journalEntries[index]['title']),
+                  trailing: Text(
+                      Helper.ratingToString(journalEntries[index].rating) +
+                          ' / ' +
+                          JournalEntryForm.maxRating.toString()),
+                  title: Text(journalEntries[index].title),
                   subtitle:
-                      Text(Helper.toHumanDate(journalEntries[index]['date'])),
+                      Text(Helper.toHumanDate(journalEntries[index].date)),
                   onTap: () => onTapCallback(index),
                 ));
           },
@@ -191,7 +188,7 @@ class _JournalState extends State<Journal> {
     JournalDatabaseTransfer returnedEntry = await goToJournalEntryScreen();
 
     if (returnedEntry != null) {
-      List<Map<String, dynamic>> updatedJournalEntries =
+      List<JournalDatabaseTransfer> updatedJournalEntries =
           await journalDatabaseController.getAllJournalEntries();
       setState(() => journalEntries = updatedJournalEntries);
     }

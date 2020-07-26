@@ -2,14 +2,24 @@ import 'day_of_week.dart';
 import 'month.dart';
 
 class Helper {
-  static String toHumanDate(String date) {
-    var datetime = DateTime.parse(date);
-    return DayOfWeek.short[datetime.weekday - 1] +
+  static String toHumanDate(DateTime date) {
+    return DayOfWeek.short[date.weekday - 1] +
         ', ' +
-        Month.short[datetime.month - 1] +
+        Month.short[date.month - 1] +
         ' ' +
-        datetime.day.toString() +
+        date.day.toString() +
         ', ' +
-        datetime.year.toString();
+        date.year.toString();
+  }
+
+  static String ratingToString(double rating) {
+    //Increment rating because rating is 0-indexed.
+    rating++;
+    if (rating % 1 > 0) {
+      //Then we dont need to truncate rating.
+      return rating.toString();
+    } else {
+      return rating.truncate().toString();
+    }
   }
 }

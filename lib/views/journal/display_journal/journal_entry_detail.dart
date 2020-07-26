@@ -15,17 +15,20 @@ class JournalEntryDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double maxTitleWidth = MediaQuery.of(context).size.width * 0.8;
+
     return SingleChildScrollView(
         child: Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Padding(
+        Container(
+          width: maxTitleWidth,
           padding: EdgeInsets.all(defaultPadding),
           child: Text(journalEntry.title, style: titleStyle),
         ),
         Padding(
           padding: EdgeInsets.all(defaultPadding),
           child: Text(
-              journalEntry.rating.toString() +
+              Helper.ratingToString(journalEntry.rating) +
                   ' / ' +
                   JournalEntryForm.maxRating.toString(),
               style: ratingStyle),
@@ -35,7 +38,7 @@ class JournalEntryDetail extends StatelessWidget {
         Padding(
             padding: EdgeInsets.fromLTRB(10, 0, 0, 5),
             child: Text(
-              Helper.toHumanDate(journalEntry.date.toString()),
+              Helper.toHumanDate(journalEntry.date),
               style: TextStyle(
                   fontSize: 12, color: Theme.of(context).primaryColorLight),
             )),

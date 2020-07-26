@@ -13,7 +13,7 @@ class JournalDetails extends StatelessWidget {
     JournalDatabaseTransfer jdt = ModalRoute.of(context).settings.arguments;
 
     return DefaultScaffold(
-        title: Helper.toHumanDate(jdt.date.toString()),
+        title: Helper.toHumanDate(jdt.date),
         child: JournalEntryDetail(journalEntry: jdt));
   }
 }

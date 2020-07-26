@@ -51,10 +51,13 @@ class JournalDatabaseController {
     });
   }
 
-  Future<List<Map<String, dynamic>>> getAllJournalEntries() async {
+  Future<List<JournalDatabaseTransfer>> getAllJournalEntries() async {
     List<Map<String, dynamic>> journalEntries =
         await _db.rawQuery(_dbQueries[_selectAllJournalEntries]);
-    return journalEntries;
+
+    return journalEntries
+        .map((entry) => JournalDatabaseTransfer.fromMap(entry))
+        .toList();
   }
 
   Future<JournalDatabaseTransfer> insertJournalEntry(
