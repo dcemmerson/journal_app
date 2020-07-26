@@ -45,9 +45,7 @@ class ThemeController {
 
   // dark mode
 
-  ThemeController({this.darkMode: false}) {
-    print(this.darkMode);
-  }
+  ThemeController({this.darkMode: false});
 
   ThemeData get themeData => darkMode ? _themeDark : _themeLight;
 }

@@ -27,26 +27,58 @@ class JournalEntryForm extends StatefulWidget {
 }
 
 class _JournalEntryFormState extends State<JournalEntryForm> {
-  JournalDatabaseTransfer journalDatabaseTransfer = JournalDatabaseTransfer();
-  bool errorSaving = false;
+  JournalDatabaseTransfer _journalDatabaseTransfer = JournalDatabaseTransfer();
+  bool _errorSaving = false;
+  bool _formChanged = false;
 
-  Widget buildForm() {
-    print('previous jdt');
-    print(widget.previousJdt);
+  void _onFormChanged() {
+    if (!_formChanged) {
+      setState(() => _formChanged = true);
+    }
+  }
+
+  Future<bool> _onWillPop() {
+    if (!_formChanged) {
+      return Future<bool>.value(true);
+    }
+
+    return showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text(
+                'Are you sure you want to abandon form? Unsaved changes will be lost.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Cancel'),
+                textColor: Colors.red,
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              FlatButton(
+                  child: Text('Abandon'),
+                  onPressed: () => Navigator.pop(context, true)),
+            ],
+          );
+        });
+  }
+
+  Widget _buildForm() {
     return SingleChildScrollView(
         child: Form(
             key: widget._formKey,
+            onWillPop: _onWillPop,
+            onChanged: _onFormChanged,
             child: Column(
               children: [
-                titleField(),
-                bodyField(),
-                starRatingField(),
-                buttonRow()
+                _titleField(),
+                _bodyField(),
+                _starRatingField(),
+                _buttonRow(),
               ],
             )));
   }
 
-  Widget titleField() {
+  Widget _titleField() {
     return Padding(
         padding: EdgeInsets.fromLTRB(widget.paddingLeft, widget.paddingTop,
             widget.paddingRight, widget.paddingBottom),
@@ -55,12 +87,12 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
               InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
           initialValue:
               widget.previousJdt != null ? widget.previousJdt.title : '',
-          validator: (value) => emptyStringValidator(value, 'title'),
-          onSaved: (value) => journalDatabaseTransfer.title = value,
+          validator: (value) => _emptyStringValidator(value, 'title'),
+          onSaved: (value) => _journalDatabaseTransfer.title = value,
         ));
   }
 
-  Widget bodyField() {
+  Widget _bodyField() {
     return Padding(
         padding: EdgeInsets.fromLTRB(widget.paddingLeft, widget.paddingTop,
             widget.paddingRight, widget.paddingBottom),
@@ -71,28 +103,12 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
               widget.previousJdt != null ? widget.previousJdt.body : '',
           minLines: 2,
           maxLines: 4,
-          validator: (value) => emptyStringValidator(value, 'body'),
-          onSaved: (value) => journalDatabaseTransfer.body = value,
+          validator: (value) => _emptyStringValidator(value, 'body'),
+          onSaved: (value) => _journalDatabaseTransfer.body = value,
         ));
   }
 
-  // Widget ratingField() {
-  //   return Padding(
-  //       padding: EdgeInsets.fromLTRB(widget.paddingLeft, widget.paddingTop,
-  //           widget.paddingRight, widget.paddingBottom),
-  //       child: TextFormField(
-  //         decoration: InputDecoration(
-  //             labelText: 'Rating', border: OutlineInputBorder()),
-  //         initialValue: widget.previousJdt != null
-  //             ? widget.previousJdt.rating.toString()
-  //             : '',
-  //         validator: (value) => intValidator(value, 'rating',
-  //             JournalEntryForm.minRating, JournalEntryForm.maxRating),
-  //         onSaved: (value) => journalDatabaseTransfer.rating = int.parse(value),
-  //       ));
-  // }
-
-  Widget starRatingField() {
+  Widget _starRatingField() {
     return Padding(
         padding: EdgeInsets.fromLTRB(widget.paddingLeft, widget.paddingTop,
             widget.paddingRight, widget.paddingBottom),
@@ -102,7 +118,7 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
               : '0',
           validator: (value) => null,
           onSaved: (value) =>
-              journalDatabaseTransfer.rating = double.parse(value),
+              _journalDatabaseTransfer.rating = double.parse(value),
           builder: (FormFieldState<String> field) {
             double rating =
                 (field.value != null) ? double.parse(field.value) : 0;
@@ -116,34 +132,36 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         ));
   }
 
-  Widget buttonRow() {
+  Widget _buttonRow() {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [cancelButton(), saveButton()]);
+        children: [_cancelButton(), _saveButton()]);
   }
 
-  Widget cancelButton() {
+  Widget _cancelButton() {
     return RaisedButton(
         child: Text('Cancel'),
-        onPressed: () {
-          Navigator.pop(context);
+        onPressed: () async {
+          if (await _onWillPop()) {
+            Navigator.pop(context);
+          }
         });
   }
 
-  Widget saveButton() {
+  Widget _saveButton() {
     return Builder(builder: (BuildContext ctx) {
       return RaisedButton(
           child: Text('Save'),
           onPressed: () {
             if (widget._formKey.currentState.validate()) {
-              persistEntry(ctx);
+              _persistEntry(ctx);
             }
           });
     });
   }
 
   /// Save/update and validation related
-  void persistEntry(BuildContext ctx) async {
+  void _persistEntry(BuildContext ctx) async {
     try {
       JournalDatabaseController jdc = JournalDatabaseController.getInstance();
       widget._formKey.currentState.save();
@@ -151,32 +169,30 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
         // Then this entry exists in db and we are updating
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updating')));
         await jdc.updateJournalEntry(
-            widget.previousJdt.id, journalDatabaseTransfer);
+            widget.previousJdt.id, _journalDatabaseTransfer);
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updated!')));
       } else {
         // Else new entry we need to insert into db.
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
-        await jdc.insertJournalEntry(journalDatabaseTransfer);
+        await jdc.insertJournalEntry(_journalDatabaseTransfer);
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saved!')));
       }
 
-      Navigator.pop(ctx, journalDatabaseTransfer);
+      Navigator.pop(ctx, _journalDatabaseTransfer);
     } catch (err) {
       print(err);
-      setState(() {
-        errorSaving = true;
-      });
+      setState(() => _errorSaving = true);
     }
   }
 
-  String emptyStringValidator(String value, String fieldName) {
+  String _emptyStringValidator(String value, String fieldName) {
     if (value.isEmpty) {
       return 'Please enter $fieldName';
     }
     return null;
   }
 
-  String intValidator(String value, String fieldName, int min, int max) {
+  String _intValidator(String value, String fieldName, int min, int max) {
     if (value.isEmpty ||
         !_isInteger(value) ||
         int.parse(value) < min ||
@@ -197,6 +213,6 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultScaffold(title: widget.pageTitle, child: buildForm());
+    return DefaultScaffold(title: widget.pageTitle, child: _buildForm());
   }
 }
