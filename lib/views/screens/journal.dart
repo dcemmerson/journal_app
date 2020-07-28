@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:journal/blocs/journal_bloc.dart';
+import 'package:journal/blocs/journal_state.dart';
 import 'package:journal/database/journal_database_controller.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/misc/helper.dart';
@@ -21,60 +23,53 @@ class Journal extends StatefulWidget {
 }
 
 class _JournalState extends State<Journal> {
-  bool loading = true;
-  bool loadJournalError = false;
+  JournalBloc _bloc;
+  // bool loading = true;
+  // bool loadJournalError = false;
   int selectedJournalIndex = 0;
-  List<JournalDatabaseTransfer> journalEntries;
+  // List<JournalDatabaseTransfer> journalEntries;
   JournalDatabaseController journalDatabaseController;
 
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _bloc = JournalStateContainer.of(context).blocProvider.journalBloc;
+  }
   // JournalDatabaseInteractions journalDatabaseInteractions;
 
-  _JournalState() {
-    initDatabase();
-  }
+  // _JournalState() {
+  //   initDatabase();
+  // }
 
-  void initDatabase() async {
-    try {
-      await JournalDatabaseController.init();
-      journalDatabaseController = JournalDatabaseController.getInstance();
-      journalEntries = await journalDatabaseController.getAllJournalEntries();
-    } catch (err) {
-      print(err);
-      setState(() => loadJournalError = true);
-    } finally {
-      setState(() {
-        loading = false;
-      });
-    }
-  }
+  // void initDatabase() async {
+  //   try {
+  //     await JournalDatabaseController.init();
+  //     journalDatabaseController = JournalDatabaseController.getInstance();
+  //     journalEntries = await journalDatabaseController.getAllJournalEntries();
+  //   } catch (err) {
+  //     print(err);
+  //     setState(() => loadJournalError = true);
+  //   } finally {
+  //     setState(() {
+  //       loading = false;
+  //     });
+  //   }
+  // }
 
   void setSelectedJournalIndex(int index) {
     setState(() => selectedJournalIndex = index);
   }
 
-  Widget shouldDisplayLoadingOrJournal() {
-    if (loading) {
-      return Loading();
-    } else if (loadJournalError) {
-      return LoadJournalError();
-    } else if (journalEntries.length == 0) {
-      return EmptyJournal(createNewEntry: goToJournalEntryScreen);
-    } else {
-      return chooseIfMasterDetailView();
-    }
-  }
-
-  Future handleDeleteJournalEntry(int journalEntryId) async {
-    try {
-      JournalDatabaseController jdc = JournalDatabaseController.getInstance();
-      await jdc.deleteJournalEntry(journalEntryId);
-      List<JournalDatabaseTransfer> updatedJournalEntries =
-          await journalDatabaseController.getAllJournalEntries();
-      setState(() => journalEntries = updatedJournalEntries);
-    } catch (err) {
-      print(err);
-    }
-  }
+  // Future handleDeleteJournalEntry(int journalEntryId) async {
+  //   try {
+  //     JournalDatabaseController jdc = JournalDatabaseController.getInstance();
+  //     await jdc.deleteJournalEntry(journalEntryId);
+  //     List<JournalDatabaseTransfer> updatedJournalEntries =
+  //         await journalDatabaseController.getAllJournalEntries();
+  //     setState(() => journalEntries = updatedJournalEntries);
+  //   } catch (err) {
+  //     print(err);
+  //   }
+  // }
 
   Future<JournalDatabaseTransfer> goToJournalEntryScreen() async {
     JournalDatabaseTransfer journalEntry = await Routes.createNewEntry(context);
@@ -90,9 +85,9 @@ class _JournalState extends State<Journal> {
     return journalEntry;
   }
 
-  void goToDetailView(BuildContext context, int index) {
-    setSelectedJournalIndex(index);
-    Routes.journalDetailView(context, journalEntry: journalEntries[index]);
+  void goToDetailView(BuildContext context, JournalDatabaseTransfer jdt) {
+    // setSelectedJournalIndex(index);
+    Routes.journalDetailView(context, journalEntry: jdt);
   }
 
   Widget chooseIfMasterDetailView() {
@@ -100,61 +95,59 @@ class _JournalState extends State<Journal> {
       if (constraints.maxWidth > 500) {
         return masterDetailView();
       } else {
-        return listView((index) => goToDetailView(context, index));
+        return listViewStreamBuilder(goToJournalUpdateScreen);
       }
     });
   }
 
   Widget masterDetailView() {
     return GridView.count(
-        crossAxisCount: 2,
-        children: [listView(setSelectedJournalIndex), detailView()]);
+        crossAxisCount: 2, children: [listViewStreamBuilder(), detailView()]);
   }
 
-  Widget detailView() {
-    return Column(children: [
-      JournalEntryDetail(journalEntry: journalEntries[selectedJournalIndex])
-    ]);
+  Widget detailView(JournalDatabaseTransfer jdt) {
+    return Column(children: [JournalEntryDetail(journalEntry: jdt)]);
   }
 
-  void handleDismissedItem(
-      DismissDirection direction, JournalDatabaseTransfer jdt) async {
-    try {
-      List<JournalDatabaseTransfer> updatedJournal = List.from(journalEntries);
+  // void handleDismissedItem(
+  //     DismissDirection direction, JournalDatabaseTransfer jdt) async {
+  //   try {
+  //     List<JournalDatabaseTransfer> updatedJournal = List.from(journalEntries);
 
-      //Remove from widget tree otherwise ListView will throw error.
-      updatedJournal
-          .removeWhere((entry) => (entry.id == jdt.id) ? true : false);
-      setState(() => journalEntries = updatedJournal);
+  //     //Remove from widget tree otherwise ListView will throw error.
+  //     updatedJournal
+  //         .removeWhere((entry) => (entry.id == jdt.id) ? true : false);
+  //     setState(() => journalEntries = updatedJournal);
 
-      //Now decide if we are deleting or updating.
-      if (direction == DismissDirection.startToEnd) {
-        await journalDatabaseController.deleteJournalEntry(jdt.id);
-      } else {
-        //JournalDatabaseTransfer updatedEntry =
-        await goToJournalUpdateScreen(jdt);
-        List<JournalDatabaseTransfer> updatedEntries =
-            await journalDatabaseController.getAllJournalEntries();
+  //     //Now decide if we are deleting or updating.
+  //     if (direction == DismissDirection.startToEnd) {
+  //       await journalDatabaseController.deleteJournalEntry(jdt.id);
+  //     } else {
+  //       //JournalDatabaseTransfer updatedEntry =
+  //       await goToJournalUpdateScreen(jdt);
+  //       List<JournalDatabaseTransfer> updatedEntries =
+  //           await journalDatabaseController.getAllJournalEntries();
 
-        setState(() => journalEntries = updatedEntries);
-      }
-    } catch (err) {
-      print(err);
-      setState(() => loadJournalError = true);
-    }
-  }
+  //       setState(() => journalEntries = updatedEntries);
+  //     }
+  //   } catch (err) {
+  //     print(err);
+  //     setState(() => loadJournalError = true);
+  //   }
+  // }
 
-  Widget listView(Function onTapCallback) {
+  Widget listView(
+      List<JournalDatabaseTransfer> snapshot, Function onTapCallback) {
     return Padding(
         padding: EdgeInsets.fromLTRB(0, 0, 0, 40),
         child: ListView.separated(
           padding: EdgeInsets.all(2),
           shrinkWrap: true,
-          itemCount: journalEntries.length,
+          itemCount: snapshot.length,
           separatorBuilder: (_, __) => Divider(),
           itemBuilder: (_, index) {
             return Dismissible(
-                key: ValueKey(journalEntries[index].id),
+                key: ValueKey(snapshot[index].id),
                 background: Container(
                     alignment: Alignment.centerLeft,
                     color: Colors.red,
@@ -167,41 +160,42 @@ class _JournalState extends State<Journal> {
                     child: Padding(
                         padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
                         child: Icon(Icons.edit))),
-                onDismissed: (direction) =>
-                    handleDismissedItem(direction, journalEntries[index]),
+                // onDismissed: (direction) =>
+                //     handleDismissedItem(direction, journalEntries[index]),
                 child: ListTile(
                   leading: Icon(Icons.arrow_forward_ios),
-                  trailing: Text(
-                      Helper.ratingToString(journalEntries[index].rating) +
-                          ' / ' +
-                          JournalEntryForm.maxRating.toString()),
-                  title: Text(journalEntries[index].title),
-                  subtitle:
-                      Text(Helper.toHumanDate(journalEntries[index].date)),
-                  onTap: () => onTapCallback(index),
+                  trailing: Text(Helper.ratingToString(snapshot[index].rating) +
+                      ' / ' +
+                      JournalEntryForm.maxRating.toString()),
+                  title: Text(snapshot[index].title),
+                  subtitle: Text(Helper.toHumanDate(snapshot[index].date)),
+                  onTap: () => onTapCallback(snapshot[index]),
                 ));
           },
         ));
   }
 
-  void handleFloatingButtonAddEntry() async {
-    JournalDatabaseTransfer returnedEntry = await goToJournalEntryScreen();
-
-    if (returnedEntry != null) {
-      List<JournalDatabaseTransfer> updatedJournalEntries =
-          await journalDatabaseController.getAllJournalEntries();
-      setState(() => journalEntries = updatedJournalEntries);
-    }
+  Widget listViewStreamBuilder(Function onTapCallback) {
+    return StreamBuilder(
+        stream: _bloc.journalEntries,
+        builder: (context, snapshot) {
+          print(snapshot);
+          if (snapshot.hasData) {
+            return listView(snapshot.data, onTapCallback);
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultScaffold(
       title: widget.title,
-      child: shouldDisplayLoadingOrJournal(),
+      child: chooseIfMasterDetailView(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: handleFloatingButtonAddEntry,
+        onPressed: goToJournalEntryScreen,
       ),
     );
   }

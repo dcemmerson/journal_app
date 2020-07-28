@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/io/json_reader.dart';
 import 'package:sqflite/sqflite.dart';
@@ -15,7 +17,12 @@ class JournalDatabaseController {
   static JournalDatabaseController _instance;
   final Database _db;
 
-  JournalDatabaseController._(Database database) : _db = database;
+  StreamController<List<JournalDatabaseTransfer>> journalChangeNotifier =
+      StreamController<List<JournalDatabaseTransfer>>.broadcast();
+
+  JournalDatabaseController._(Database database) : _db = database {
+    journalEntries.then((entries) => journalChangeNotifier.add(entries));
+  }
 
   factory JournalDatabaseController.getInstance() {
     assert(_instance != null);
@@ -42,35 +49,39 @@ class JournalDatabaseController {
     await _db.close();
   }
 
-  Future<int> getJournalEntryCount() {
-    return getAllJournalEntries()
-        .then((entries) => entries.length)
-        .catchError((err) {
-      print(err);
-      return -1;
-    });
-  }
+  Future<int> get journalEntryCount =>
+      journalEntries.then((entries) => entries.length).catchError((err) {
+        print(err);
+        return -1;
+      });
 
-  Future<List<JournalDatabaseTransfer>> getAllJournalEntries() async {
-    List<Map<String, dynamic>> journalEntries =
-        await _db.rawQuery(_dbQueries[_selectAllJournalEntries]);
+  Future<List<JournalDatabaseTransfer>> get journalEntries => _db
+      .rawQuery(_dbQueries[_selectAllJournalEntries])
+      .then((entries) => entries
+          .map((entry) => JournalDatabaseTransfer.fromMap(entry))
+          .toList());
 
-    return journalEntries
-        .map((entry) => JournalDatabaseTransfer.fromMap(entry))
-        .toList();
-  }
+  // Future<List<JournalDatabaseTransfer>> getAllJournalEntries() async {
+  //   List<Map<String, dynamic>> journalEntries =
+  //       await _db.rawQuery(_dbQueries[_selectAllJournalEntries]);
 
-  Future<JournalDatabaseTransfer> insertJournalEntry(
-      JournalDatabaseTransfer jdt) async {
+  //   return journalEntries
+  //       .map((entry) => JournalDatabaseTransfer.fromMap(entry))
+  //       .toList();
+  // }
+
+  Future insertJournalEntry(JournalDatabaseTransfer jdt) async {
     jdt.id = await _db.insert(_tableName, jdt.toMap());
-    return jdt;
+    journalChangeNotifier.add(await journalEntries);
   }
 
-  Future<void> deleteJournalEntry(int id) async {
+  Future deleteJournalEntry(int id) async {
     await _db.delete(_tableName, where: 'id=?', whereArgs: [id]);
+    journalChangeNotifier.add(await journalEntries);
   }
 
-  Future<void> updateJournalEntry(int id, JournalDatabaseTransfer jdt) async {
+  Future updateJournalEntry(int id, JournalDatabaseTransfer jdt) async {
     await _db.update(_tableName, jdt.toMap(), where: 'id=?', whereArgs: [id]);
+    journalChangeNotifier.add(await journalEntries);
   }
 }

@@ -10,7 +10,10 @@ class JsonReader {
     print('read file');
     print(fileUri);
     return Future<Map<String, String>>(() {
+      print('read file 2nd');
       return rootBundle.loadString(fileUri).then(jsonDecode).then((decoded) {
+        print('decode');
+        print(decoded);
         return decoded.cast<String, String>();
       });
     });
