@@ -5,6 +5,7 @@ import 'package:journal/blocs/journal_state.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/routes/routes.dart';
 import 'package:journal/views/default_scaffold.dart';
+import 'package:journal/views/widgets/empty_journal.dart';
 
 import 'package:journal/views/widgets/journal_entry_detail_view.dart';
 import 'package:journal/views/widgets/journal_list_view.dart';
@@ -86,80 +87,12 @@ class _JournalState extends State<Journal> {
         physics: NeverScrollableScrollPhysics(),
         children: [
           JournalListView(journalEntries: entries, isMasterDetailView: true),
-          JournalEntryDetailView(
-              journalEntry: entries[_selectedIndex], sizeFactor: 1 / 2),
+          (_selectedIndex < entries.length)
+              ? JournalEntryDetailView(
+                  journalEntry: entries[_selectedIndex], sizeFactor: 1 / 2)
+              : Column(),
         ]);
   }
-
-  // Widget detailView(JournalDatabaseTransfer jdt) {
-  //   return Column(children: [JournalEntryDetail(journalEntry: jdt)]);
-  // }
-
-  // void handleDismissedItem(
-  //     DismissDirection direction, JournalDatabaseTransfer jdt) async {
-  //   try {
-  //     List<JournalDatabaseTransfer> updatedJournal = List.from(journalEntries);
-
-  //     //Remove from widget tree otherwise ListView will throw error.
-  //     updatedJournal
-  //         .removeWhere((entry) => (entry.id == jdt.id) ? true : false);
-  //     setState(() => journalEntries = updatedJournal);
-
-  //     //Now decide if we are deleting or updating.
-  //     if (direction == DismissDirection.startToEnd) {
-  //       await journalDatabaseController.deleteJournalEntry(jdt.id);
-  //     } else {
-  //       //JournalDatabaseTransfer updatedEntry =
-  //       await goToJournalUpdateScreen(jdt);
-  //       List<JournalDatabaseTransfer> updatedEntries =
-  //           await journalDatabaseController.getAllJournalEntries();
-
-  //       setState(() => journalEntries = updatedEntries);
-  //     }
-  //   } catch (err) {
-  //     print(err);
-  //     setState(() => loadJournalError = true);
-  //   }
-  // }
-
-  // Widget listView(
-  //     List<JournalDatabaseTransfer> snapshot, Function onTapCallback) {
-  //   return Padding(
-  //       padding: EdgeInsets.fromLTRB(0, 0, 0, 40),
-  //       child: ListView.separated(
-  //         padding: EdgeInsets.all(2),
-  //         shrinkWrap: true,
-  //         itemCount: snapshot.length,
-  //         separatorBuilder: (_, __) => Divider(),
-  //         itemBuilder: (_, index) {
-  //           return Dismissible(
-  //               key: ValueKey(snapshot[index].id),
-  //               background: Container(
-  //                   alignment: Alignment.centerLeft,
-  //                   color: Colors.red,
-  //                   child: Padding(
-  //                       padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-  //                       child: Icon(Icons.delete_forever))),
-  //               secondaryBackground: Container(
-  //                   alignment: Alignment.centerRight,
-  //                   color: Colors.green,
-  //                   child: Padding(
-  //                       padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-  //                       child: Icon(Icons.edit))),
-  //               // onDismissed: (direction) =>
-  //               //     handleDismissedItem(direction, journalEntries[index]),
-  //               child: ListTile(
-  //                 leading: Icon(Icons.arrow_forward_ios),
-  //                 trailing: Text(Helper.ratingToString(snapshot[index].rating) +
-  //                     ' / ' +
-  //                     JournalEntryForm.maxRating.toString()),
-  //                 title: Text(snapshot[index].title),
-  //                 subtitle: Text(Helper.toHumanDate(snapshot[index].date)),
-  //                 onTap: () => onTapCallback(index),
-  //               ));
-  //         },
-  //       ));
-  // }
 
   Widget listViewStreamBuilder() {
     return StreamBuilder(
@@ -167,14 +100,17 @@ class _JournalState extends State<Journal> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return LayoutBuilder(builder: (context, constraints) {
-              if (constraints.maxWidth > 500) {
+              if (constraints.maxWidth > 500 && snapshot.data.length > 0) {
                 return masterDetailView(snapshot.data);
-              } else {
+              } else if (snapshot.data.length > 0) {
                 return JournalListView(
                   journalEntries: snapshot.data,
                   // onTapCallback: (int index) =>
                   //     goToDetailView(context, snapshot.data[index]),
                 );
+              } else {
+                return EmptyJournal(
+                    goToJournalEntryScreen: goToJournalEntryScreen);
               }
             });
 //            return listView(snapshot.data, onTapCallback);

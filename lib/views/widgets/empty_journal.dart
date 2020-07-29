@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class EmptyJournal extends StatelessWidget {
-  final Function createNewEntry;
-  EmptyJournal({this.createNewEntry});
+  final Function goToJournalEntryScreen;
+  EmptyJournal({@required this.goToJournalEntryScreen});
 
   Widget textRow() {
     return Padding(
@@ -17,7 +17,8 @@ class EmptyJournal extends StatelessWidget {
         padding: EdgeInsets.all(20),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           RaisedButton(
-              onPressed: createNewEntry, child: Text('Add your first entry!'))
+              onPressed: goToJournalEntryScreen,
+              child: Icon(Icons.border_color))
         ]));
   }
 
