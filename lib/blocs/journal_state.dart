@@ -23,12 +23,22 @@ class JournalStateContainer extends StatefulWidget {
 
 class JournalState extends State<JournalStateContainer> {
   BlocProvider get blocProvider => widget.blocProvider;
+  int _selectedIndex = 0;
+
+  get selectedIndex => _selectedIndex;
+
+  set selectedIndex(int index) => setState(() {
+        _selectedIndex = index;
+        print('setting state ' + index.toString());
+      });
 
   @override
   Widget build(BuildContext context) {
+    print('build');
     return _JournalContainer(
       journalData: this,
       blocProvider: widget.blocProvider,
+      selectedIndex: _selectedIndex,
       child: widget.child,
     );
   }
@@ -41,17 +51,22 @@ class JournalState extends State<JournalStateContainer> {
 class _JournalContainer extends InheritedWidget {
   final JournalState journalData;
   final BlocProvider blocProvider;
+  final int selectedIndex;
 
   _JournalContainer({
     Key key,
     @required this.journalData,
     @required child,
     @required this.blocProvider,
+    @required this.selectedIndex,
   }) : super(key: key, child: child);
 
   @override
-  bool updateShouldNotify(_JournalContainer oldWidget) =>
-      oldWidget.journalData != this.journalData;
+  bool updateShouldNotify(_JournalContainer oldWidget) {
+    return oldWidget.journalData != this.journalData ||
+        oldWidget.selectedIndex != this.selectedIndex;
+    ;
+  }
 }
 
 class ServiceProvider {

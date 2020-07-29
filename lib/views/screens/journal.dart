@@ -2,17 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:journal/blocs/journal_bloc.dart';
 import 'package:journal/blocs/journal_state.dart';
-import 'package:journal/database/journal_database_controller.dart';
 import 'package:journal/database/journal_database_transfer.dart';
-import 'package:journal/misc/helper.dart';
 import 'package:journal/routes/routes.dart';
 import 'package:journal/views/default_scaffold.dart';
-import 'package:journal/views/error/load_journal_error.dart';
-import 'package:journal/views/journal/display_journal/journal_entry_detail.dart';
-import 'package:journal/views/journal/empty_journal.dart';
-import 'package:journal/views/loading/loading.dart';
 
-import 'journal_entry_form.dart';
+import 'package:journal/views/widgets/journal_entry_detail_view.dart';
+import 'package:journal/views/widgets/journal_list_view.dart';
 
 class Journal extends StatefulWidget {
   static const route = 'home';
@@ -26,13 +21,16 @@ class _JournalState extends State<Journal> {
   JournalBloc _bloc;
   // bool loading = true;
   // bool loadJournalError = false;
-  int selectedJournalIndex = 0;
+  // int selectedJournalIndex = 0;
   // List<JournalDatabaseTransfer> journalEntries;
-  JournalDatabaseController journalDatabaseController;
+//  JournalDatabaseController journalDatabaseController;
+  int _selectedIndex = 0;
 
   void didChangeDependencies() {
+    print('depencencies changed');
     super.didChangeDependencies();
     _bloc = JournalStateContainer.of(context).blocProvider.journalBloc;
+    _selectedIndex = JournalStateContainer.of(context).selectedIndex;
   }
   // JournalDatabaseInteractions journalDatabaseInteractions;
 
@@ -55,9 +53,9 @@ class _JournalState extends State<Journal> {
   //   }
   // }
 
-  void setSelectedJournalIndex(int index) {
-    setState(() => selectedJournalIndex = index);
-  }
+  // void setSelectedJournalIndex(int index) {
+  //   setState(() => selectedJournalIndex = index);
+  // }
 
   // Future handleDeleteJournalEntry(int journalEntryId) async {
   //   try {
@@ -77,37 +75,25 @@ class _JournalState extends State<Journal> {
     return journalEntry;
   }
 
-  Future<JournalDatabaseTransfer> goToJournalUpdateScreen(
-      JournalDatabaseTransfer jdt) async {
-    JournalDatabaseTransfer journalEntry =
-        await Routes.updateEntry(context, jdt);
-
-    return journalEntry;
-  }
-
   void goToDetailView(BuildContext context, JournalDatabaseTransfer jdt) {
     // setSelectedJournalIndex(index);
     Routes.journalDetailView(context, journalEntry: jdt);
   }
 
-  Widget chooseIfMasterDetailView() {
-    return LayoutBuilder(builder: (context, constraints) {
-      if (constraints.maxWidth > 500) {
-        return masterDetailView();
-      } else {
-        return listViewStreamBuilder(goToJournalUpdateScreen);
-      }
-    });
-  }
-
-  Widget masterDetailView() {
+  Widget masterDetailView(List<JournalDatabaseTransfer> entries) {
     return GridView.count(
-        crossAxisCount: 2, children: [listViewStreamBuilder(), detailView()]);
+        crossAxisCount: 2,
+        physics: NeverScrollableScrollPhysics(),
+        children: [
+          JournalListView(journalEntries: entries, isMasterDetailView: true),
+          JournalEntryDetailView(
+              journalEntry: entries[_selectedIndex], sizeFactor: 1 / 2),
+        ]);
   }
 
-  Widget detailView(JournalDatabaseTransfer jdt) {
-    return Column(children: [JournalEntryDetail(journalEntry: jdt)]);
-  }
+  // Widget detailView(JournalDatabaseTransfer jdt) {
+  //   return Column(children: [JournalEntryDetail(journalEntry: jdt)]);
+  // }
 
   // void handleDismissedItem(
   //     DismissDirection direction, JournalDatabaseTransfer jdt) async {
@@ -136,52 +122,62 @@ class _JournalState extends State<Journal> {
   //   }
   // }
 
-  Widget listView(
-      List<JournalDatabaseTransfer> snapshot, Function onTapCallback) {
-    return Padding(
-        padding: EdgeInsets.fromLTRB(0, 0, 0, 40),
-        child: ListView.separated(
-          padding: EdgeInsets.all(2),
-          shrinkWrap: true,
-          itemCount: snapshot.length,
-          separatorBuilder: (_, __) => Divider(),
-          itemBuilder: (_, index) {
-            return Dismissible(
-                key: ValueKey(snapshot[index].id),
-                background: Container(
-                    alignment: Alignment.centerLeft,
-                    color: Colors.red,
-                    child: Padding(
-                        padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-                        child: Icon(Icons.delete_forever))),
-                secondaryBackground: Container(
-                    alignment: Alignment.centerRight,
-                    color: Colors.green,
-                    child: Padding(
-                        padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-                        child: Icon(Icons.edit))),
-                // onDismissed: (direction) =>
-                //     handleDismissedItem(direction, journalEntries[index]),
-                child: ListTile(
-                  leading: Icon(Icons.arrow_forward_ios),
-                  trailing: Text(Helper.ratingToString(snapshot[index].rating) +
-                      ' / ' +
-                      JournalEntryForm.maxRating.toString()),
-                  title: Text(snapshot[index].title),
-                  subtitle: Text(Helper.toHumanDate(snapshot[index].date)),
-                  onTap: () => onTapCallback(snapshot[index]),
-                ));
-          },
-        ));
-  }
+  // Widget listView(
+  //     List<JournalDatabaseTransfer> snapshot, Function onTapCallback) {
+  //   return Padding(
+  //       padding: EdgeInsets.fromLTRB(0, 0, 0, 40),
+  //       child: ListView.separated(
+  //         padding: EdgeInsets.all(2),
+  //         shrinkWrap: true,
+  //         itemCount: snapshot.length,
+  //         separatorBuilder: (_, __) => Divider(),
+  //         itemBuilder: (_, index) {
+  //           return Dismissible(
+  //               key: ValueKey(snapshot[index].id),
+  //               background: Container(
+  //                   alignment: Alignment.centerLeft,
+  //                   color: Colors.red,
+  //                   child: Padding(
+  //                       padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+  //                       child: Icon(Icons.delete_forever))),
+  //               secondaryBackground: Container(
+  //                   alignment: Alignment.centerRight,
+  //                   color: Colors.green,
+  //                   child: Padding(
+  //                       padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+  //                       child: Icon(Icons.edit))),
+  //               // onDismissed: (direction) =>
+  //               //     handleDismissedItem(direction, journalEntries[index]),
+  //               child: ListTile(
+  //                 leading: Icon(Icons.arrow_forward_ios),
+  //                 trailing: Text(Helper.ratingToString(snapshot[index].rating) +
+  //                     ' / ' +
+  //                     JournalEntryForm.maxRating.toString()),
+  //                 title: Text(snapshot[index].title),
+  //                 subtitle: Text(Helper.toHumanDate(snapshot[index].date)),
+  //                 onTap: () => onTapCallback(index),
+  //               ));
+  //         },
+  //       ));
+  // }
 
-  Widget listViewStreamBuilder(Function onTapCallback) {
+  Widget listViewStreamBuilder() {
     return StreamBuilder(
         stream: _bloc.journalEntries,
         builder: (context, snapshot) {
-          print(snapshot);
           if (snapshot.hasData) {
-            return listView(snapshot.data, onTapCallback);
+            return LayoutBuilder(builder: (context, constraints) {
+              if (constraints.maxWidth > 500) {
+                return masterDetailView(snapshot.data);
+              } else {
+                return JournalListView(
+                  journalEntries: snapshot.data,
+                  // onTapCallback: (int index) =>
+                  //     goToDetailView(context, snapshot.data[index]),
+                );
+              }
+            });
+//            return listView(snapshot.data, onTapCallback);
           } else {
             return CircularProgressIndicator();
           }
@@ -192,7 +188,7 @@ class _JournalState extends State<Journal> {
   Widget build(BuildContext context) {
     return DefaultScaffold(
       title: widget.title,
-      child: chooseIfMasterDetailView(),
+      child: listViewStreamBuilder(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: goToJournalEntryScreen,

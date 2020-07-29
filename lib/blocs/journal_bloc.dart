@@ -73,7 +73,6 @@ class DeleteJournalEntryEvent {
 }
 
 class UpdateJournalEntryEvent {
-  final int id;
   final JournalDatabaseTransfer jdt;
-  UpdateJournalEntryEvent(this.id, this.jdt);
+  UpdateJournalEntryEvent(this.jdt);
 }

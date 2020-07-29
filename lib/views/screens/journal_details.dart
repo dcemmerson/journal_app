@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/misc/helper.dart';
 import 'package:journal/views/default_scaffold.dart';
-import 'package:journal/views/journal/display_journal/journal_entry_detail.dart';
+import 'package:journal/views/widgets/journal_entry_detail_view.dart';
 
 class JournalDetails extends StatelessWidget {
   static const route = 'journalDetails';
@@ -14,6 +14,6 @@ class JournalDetails extends StatelessWidget {
 
     return DefaultScaffold(
         title: Helper.toHumanDate(jdt.date),
-        child: JournalEntryDetail(journalEntry: jdt));
+        child: JournalEntryDetailView(journalEntry: jdt));
   }
 }

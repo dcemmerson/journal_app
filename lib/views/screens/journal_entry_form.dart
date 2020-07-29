@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:journal/blocs/journal_bloc.dart';
+import 'package:journal/blocs/journal_state.dart';
 import 'package:journal/database/journal_database_controller.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/views/default_scaffold.dart';
-import 'package:journal/views/miscellaneous_widgets/tappable_stars.dart';
+import 'package:journal/views/widgets/tappable_stars.dart';
 
 class JournalEntryForm extends StatefulWidget {
   static const minRating = 1;
@@ -166,19 +168,27 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
       JournalDatabaseController jdc = JournalDatabaseController.getInstance();
       widget._formKey.currentState.save();
       if (widget.previousJdt != null) {
+        _journalDatabaseTransfer.id = widget.previousJdt.id;
         // Then this entry exists in db and we are updating
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updating')));
-        await jdc.updateJournalEntry(
-            widget.previousJdt.id, _journalDatabaseTransfer);
+        JournalStateContainer.of(context)
+            .blocProvider
+            .journalBloc
+            .updateJournalEntrySink
+            .add(UpdateJournalEntryEvent(_journalDatabaseTransfer));
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updated!')));
       } else {
         // Else new entry we need to insert into db.
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
-        await jdc.insertJournalEntry(_journalDatabaseTransfer);
+        JournalStateContainer.of(context)
+            .blocProvider
+            .journalBloc
+            .addJournalEntrySink
+            .add(AddJournalEntryEvent(_journalDatabaseTransfer));
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saved!')));
       }
 
-      Navigator.pop(ctx, _journalDatabaseTransfer);
+      Navigator.pop(ctx);
     } catch (err) {
       print(err);
       setState(() => _errorSaving = true);

@@ -81,6 +81,10 @@ class JournalDatabaseController {
   }
 
   Future updateJournalEntry(int id, JournalDatabaseTransfer jdt) async {
+    print('inside update');
+    print(id);
+    print(id is int);
+    print(jdt);
     await _db.update(_tableName, jdt.toMap(), where: 'id=?', whereArgs: [id]);
     journalChangeNotifier.add(await journalEntries);
   }
