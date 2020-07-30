@@ -10,6 +10,7 @@ import 'database/journal_database_controller.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await JournalDatabaseController.init();
+
   var journalService =
       JournalDatabaseService(JournalDatabaseController.getInstance());
   var blocProvider = BlocProvider(journalBloc: JournalBloc(journalService));

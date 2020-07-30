@@ -1,8 +1,9 @@
 import 'package:journal/database/journal_database_controller.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 
+import 'journal_entry_translator.dart';
+
 abstract class JournalService {
-  // Stream<int> journalEntryCount();
   Stream<List<JournalDatabaseTransfer>> journalEntries();
 
   Future addJournalEntry(JournalDatabaseTransfer jdt);
@@ -17,17 +18,9 @@ class JournalDatabaseService implements JournalService {
 
   @override
   Stream<List<JournalDatabaseTransfer>> journalEntries() {
-    return journalDatabaseController.journalChangeNotifier.stream;
+    return journalDatabaseController.journalChangeNotifier.stream
+        .transform(JournalEntryTranslator());
   }
-
-  // @override
-  // Stream<int> journalEntryCount() {
-  // return journalDatabaseController.journalChangeNotifier.stream.map((entry) => )
-//    return journalDatabaseController.journalChangeNotifier.stream;
-
-  // return journalDatabaseController.journalChangeNotifier.stream
-  //     .reduce((count) => count++);
-  // }
 
   @override
   Future addJournalEntry(JournalDatabaseTransfer jdt) async {

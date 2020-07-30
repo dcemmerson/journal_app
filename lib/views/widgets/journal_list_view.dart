@@ -31,8 +31,8 @@ class JournalListView extends StatelessWidget {
 
   Future<JournalDatabaseTransfer> goToJournalUpdateScreen(
       JournalDatabaseTransfer jdt) async {
-    JournalDatabaseTransfer journalEntry =
-        await Routes.updateEntry(context, jdt);
+    JournalDatabaseTransfer journalEntry = await Routes.updateEntry(context,
+        journalEntry: jdt, entrySort: jdt.sort);
 
     return journalEntry;
   }
@@ -40,25 +40,16 @@ class JournalListView extends StatelessWidget {
   Future<bool> handleDismissedItem(
       DismissDirection direction, JournalDatabaseTransfer jdt) async {
     try {
-      //Remove from widget tree otherwise ListView will throw error.
-      // List<JournalDatabaseTransfer> updatedJournal = List.from(journalEntries);
-      // updatedJournal
-      //     .removeWhere((entry) => (entry.id == jdt.id) ? true : false);
-
       //Now decide if we are deleting or updating.
       if (direction == DismissDirection.startToEnd) {
+        // User chose to delete entry. Add delete event to sink.
         JournalStateContainer.of(context)
             .blocProvider
             .journalBloc
             .deleteJournalEntrySink
             .add(DeleteJournalEntryEvent(jdt.id));
       } else {
-        //JournalDatabaseTransfer updatedEntry =
-        //Remove from widget tree otherwise ListView will throw error.
-
-//        journalEntries = updatedJournal;
-//        setState(() => journalEntries = updatedJournal);
-
+        // User chose to update entry
         goToJournalUpdateScreen(jdt);
       }
     } catch (err) {
@@ -95,8 +86,6 @@ class JournalListView extends StatelessWidget {
                         child: Icon(Icons.edit))),
                 confirmDismiss: (direction) =>
                     handleDismissedItem(direction, journalEntries[index]),
-//                onDismissed: (direction) =>
-                //                   handleDismissedItem(direction, journalEntries[index]),
                 child: ListTile(
                   leading: Icon(Icons.arrow_forward_ios),
                   trailing: Text(

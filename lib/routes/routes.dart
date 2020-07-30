@@ -9,15 +9,23 @@ class Routes {
     Journal.route: (context) => Journal(),
     JournalDetails.route: (conext) => JournalDetails(),
     JournalEntryForm.route: (context) => JournalEntryForm(
-        previousJdt: ModalRoute.of(context).settings.arguments),
+        previousJdt:
+            (ModalRoute.of(context).settings.arguments as Map)['journalEntry'],
+        entrySort:
+            (ModalRoute.of(context).settings.arguments as Map)['entrySort']),
   };
 
-  static Future createNewEntry(BuildContext context) {
-    return Navigator.pushNamed(context, JournalEntryForm.route);
+  static Future createNewEntry(BuildContext context,
+      {@required int entrySort}) {
+    print('entry sort ' + entrySort.toString());
+    return Navigator.pushNamed(context, JournalEntryForm.route,
+        arguments: {'entrySort': entrySort});
   }
 
-  static Future updateEntry(BuildContext context, JournalDatabaseTransfer jdt) {
-    return Navigator.pushNamed(context, JournalEntryForm.route, arguments: jdt);
+  static Future updateEntry(BuildContext context,
+      {JournalDatabaseTransfer journalEntry, @required int entrySort}) {
+    return Navigator.pushNamed(context, JournalEntryForm.route,
+        arguments: {'journalEntry': journalEntry, 'entrySort': entrySort});
   }
 
   static Future journalDetailView(BuildContext context,

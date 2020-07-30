@@ -4,9 +4,12 @@ class JournalDatabaseTransfer {
   String body;
   double rating;
   DateTime date;
+  int sort;
 
   JournalDatabaseTransfer(
-      {this.id, this.title, this.body, this.rating, this.date});
+      {this.id, this.title, this.body, this.rating, this.date, this.sort});
+
+  JournalDatabaseTransfer.sort({this.sort});
 
   JournalDatabaseTransfer.fromMap(Map<String, dynamic> map) {
     id = map['id'];
@@ -14,6 +17,7 @@ class JournalDatabaseTransfer {
     body = map['body'];
     rating = map['rating'].toDouble();
     date = DateTime.parse(map['date']);
+    sort = map['sort'];
   }
 
   Map<String, dynamic> toMap() {
@@ -22,6 +26,7 @@ class JournalDatabaseTransfer {
       'body': body,
       'rating': rating.toDouble(),
       'date': DateTime.now().toString(),
+      'sort': sort,
     };
     if (id != null) {
       map['id'] = id;

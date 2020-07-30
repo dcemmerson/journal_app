@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+
 import 'package:journal/blocs/journal_bloc.dart';
 import 'package:journal/blocs/journal_state.dart';
-import 'package:journal/database/journal_database_controller.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/views/default_scaffold.dart';
 import 'package:journal/views/widgets/tappable_stars.dart';
@@ -13,6 +13,7 @@ class JournalEntryForm extends StatefulWidget {
   static const route = 'journalentryform';
 
   final JournalDatabaseTransfer previousJdt;
+  final int entrySort;
 
   final String pageTitle;
   final double paddingLeft = 20;
@@ -22,7 +23,13 @@ class JournalEntryForm extends StatefulWidget {
 
   final _formKey = GlobalKey<FormState>();
 
-  JournalEntryForm({this.pageTitle: 'New Journal Entry', this.previousJdt});
+  JournalEntryForm(
+      {this.pageTitle: 'New Journal Entry',
+      this.previousJdt,
+      @required this.entrySort}) {
+    print(previousJdt);
+    print(entrySort);
+  }
 
   @override
   _JournalEntryFormState createState() => _JournalEntryFormState();
@@ -30,6 +37,7 @@ class JournalEntryForm extends StatefulWidget {
 
 class _JournalEntryFormState extends State<JournalEntryForm> {
   JournalDatabaseTransfer _journalDatabaseTransfer = JournalDatabaseTransfer();
+
   bool _errorSaving = false;
   bool _formChanged = false;
 
@@ -165,10 +173,15 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   /// Save/update and validation related
   void _persistEntry(BuildContext ctx) async {
     try {
-      JournalDatabaseController jdc = JournalDatabaseController.getInstance();
+      print('saving...');
       widget._formKey.currentState.save();
+      print('saving...');
+
       if (widget.previousJdt != null) {
+        print('updating');
+
         _journalDatabaseTransfer.id = widget.previousJdt.id;
+        _journalDatabaseTransfer.sort = widget.previousJdt.sort;
         // Then this entry exists in db and we are updating
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updating')));
         JournalStateContainer.of(context)
@@ -178,8 +191,11 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
             .add(UpdateJournalEntryEvent(_journalDatabaseTransfer));
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updated!')));
       } else {
+        print('saving');
+
         // Else new entry we need to insert into db.
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
+        _journalDatabaseTransfer.sort = widget.entrySort;
         JournalStateContainer.of(context)
             .blocProvider
             .journalBloc
@@ -196,29 +212,11 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   }
 
   String _emptyStringValidator(String value, String fieldName) {
+    print('validating');
     if (value.isEmpty) {
       return 'Please enter $fieldName';
     }
     return null;
-  }
-
-  String _intValidator(String value, String fieldName, int min, int max) {
-    if (value.isEmpty ||
-        !_isInteger(value) ||
-        int.parse(value) < min ||
-        int.parse(value) > max) {
-      return 'Please enter valid $fieldName (${JournalEntryForm.minRating} - ${JournalEntryForm.maxRating})';
-    }
-    return null;
-  }
-
-  bool _isInteger(value) {
-    try {
-      var checkedInt = int.parse(value);
-      return checkedInt is int;
-    } catch (err) {
-      return false;
-    }
   }
 
   @override

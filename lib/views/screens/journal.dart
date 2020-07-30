@@ -5,6 +5,7 @@ import 'package:journal/blocs/journal_state.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/routes/routes.dart';
 import 'package:journal/views/default_scaffold.dart';
+import 'package:journal/views/error/load_journal_error.dart';
 import 'package:journal/views/widgets/empty_journal.dart';
 
 import 'package:journal/views/widgets/journal_entry_detail_view.dart';
@@ -20,58 +21,19 @@ class Journal extends StatefulWidget {
 
 class _JournalState extends State<Journal> {
   JournalBloc _bloc;
-  // bool loading = true;
-  // bool loadJournalError = false;
-  // int selectedJournalIndex = 0;
-  // List<JournalDatabaseTransfer> journalEntries;
-//  JournalDatabaseController journalDatabaseController;
   int _selectedIndex = 0;
+  int _journalEntryCount = 0;
 
   void didChangeDependencies() {
-    print('depencencies changed');
     super.didChangeDependencies();
+    print('depencencies changed');
     _bloc = JournalStateContainer.of(context).blocProvider.journalBloc;
     _selectedIndex = JournalStateContainer.of(context).selectedIndex;
   }
-  // JournalDatabaseInteractions journalDatabaseInteractions;
-
-  // _JournalState() {
-  //   initDatabase();
-  // }
-
-  // void initDatabase() async {
-  //   try {
-  //     await JournalDatabaseController.init();
-  //     journalDatabaseController = JournalDatabaseController.getInstance();
-  //     journalEntries = await journalDatabaseController.getAllJournalEntries();
-  //   } catch (err) {
-  //     print(err);
-  //     setState(() => loadJournalError = true);
-  //   } finally {
-  //     setState(() {
-  //       loading = false;
-  //     });
-  //   }
-  // }
-
-  // void setSelectedJournalIndex(int index) {
-  //   setState(() => selectedJournalIndex = index);
-  // }
-
-  // Future handleDeleteJournalEntry(int journalEntryId) async {
-  //   try {
-  //     JournalDatabaseController jdc = JournalDatabaseController.getInstance();
-  //     await jdc.deleteJournalEntry(journalEntryId);
-  //     List<JournalDatabaseTransfer> updatedJournalEntries =
-  //         await journalDatabaseController.getAllJournalEntries();
-  //     setState(() => journalEntries = updatedJournalEntries);
-  //   } catch (err) {
-  //     print(err);
-  //   }
-  // }
 
   Future<JournalDatabaseTransfer> goToJournalEntryScreen() async {
-    JournalDatabaseTransfer journalEntry = await Routes.createNewEntry(context);
+    JournalDatabaseTransfer journalEntry =
+        await Routes.createNewEntry(context, entrySort: _journalEntryCount);
 
     return journalEntry;
   }
@@ -98,22 +60,22 @@ class _JournalState extends State<Journal> {
     return StreamBuilder(
         stream: _bloc.journalEntries,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasError) {
+            return LoadJournalError();
+          } else if (snapshot.hasData) {
+            _journalEntryCount = snapshot.data.length;
             return LayoutBuilder(builder: (context, constraints) {
               if (constraints.maxWidth > 500 && snapshot.data.length > 0) {
                 return masterDetailView(snapshot.data);
               } else if (snapshot.data.length > 0) {
                 return JournalListView(
                   journalEntries: snapshot.data,
-                  // onTapCallback: (int index) =>
-                  //     goToDetailView(context, snapshot.data[index]),
                 );
               } else {
                 return EmptyJournal(
                     goToJournalEntryScreen: goToJournalEntryScreen);
               }
             });
-//            return listView(snapshot.data, onTapCallback);
           } else {
             return CircularProgressIndicator();
           }

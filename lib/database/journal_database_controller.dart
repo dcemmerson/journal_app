@@ -5,6 +5,7 @@ import 'package:journal/io/json_reader.dart';
 import 'package:sqflite/sqflite.dart';
 
 class JournalDatabaseController {
+  static const _dropJournalIfExists = 'dropJournalIfExists';
   static const _createJournalIfNotExists = 'createJournalIfNotExists';
   static const _selectAllJournalEntries = 'selectAllJournalEntries';
   static const _insertJournalEntry = 'insertJournalEntry';
@@ -61,15 +62,6 @@ class JournalDatabaseController {
           .map((entry) => JournalDatabaseTransfer.fromMap(entry))
           .toList());
 
-  // Future<List<JournalDatabaseTransfer>> getAllJournalEntries() async {
-  //   List<Map<String, dynamic>> journalEntries =
-  //       await _db.rawQuery(_dbQueries[_selectAllJournalEntries]);
-
-  //   return journalEntries
-  //       .map((entry) => JournalDatabaseTransfer.fromMap(entry))
-  //       .toList();
-  // }
-
   Future insertJournalEntry(JournalDatabaseTransfer jdt) async {
     jdt.id = await _db.insert(_tableName, jdt.toMap());
     journalChangeNotifier.add(await journalEntries);
@@ -81,11 +73,16 @@ class JournalDatabaseController {
   }
 
   Future updateJournalEntry(int id, JournalDatabaseTransfer jdt) async {
-    print('inside update');
-    print(id);
-    print(id is int);
-    print(jdt);
     await _db.update(_tableName, jdt.toMap(), where: 'id=?', whereArgs: [id]);
     journalChangeNotifier.add(await journalEntries);
+  }
+
+  Future dropJournalTable() async {
+    await _db.execute(_dbQueries[_dropJournalIfExists]);
+  }
+
+  Future createJournalTable() async {
+    print('creating table\n\n\n');
+    return await _db.execute(_dbQueries[_createJournalIfNotExists]);
   }
 }
