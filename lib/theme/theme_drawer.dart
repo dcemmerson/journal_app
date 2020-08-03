@@ -1,3 +1,10 @@
+/// filename: theme_drawer.dart
+/// last modified: 08/03/2020
+/// description: Stateless widget to add drawer to journal app which allows
+///   user to switch between dark and light mode. The current theme should
+///   be passed into constructor as ThemeController instance with method
+///   to toggle theme.
+
 import 'package:flutter/material.dart';
 import 'package:journal/theme/theme_controller.dart';
 

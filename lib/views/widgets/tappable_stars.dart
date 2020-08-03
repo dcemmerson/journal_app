@@ -1,3 +1,9 @@
+/// filename: tappable_stars.dart
+/// last modified: 08/03/2020
+/// description: Stateless widget which allows user to be able tap stars
+///   to enter rating for journal entry. Current rating and setRating methods
+///   must be passed into TappableStars.
+
 import 'package:flutter/material.dart';
 
 class TappableStars extends StatelessWidget {

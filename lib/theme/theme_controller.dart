@@ -1,23 +1,19 @@
+/// filename: theme_controller.dart
+/// last modified: 08/03/2020
+/// description: Class that defines the color themes for journal app
+///   and provides get method which will return the theme for current
+///   dark mode setting.
+
 import 'package:flutter/material.dart';
 
 class ThemeController {
-  // //use static constants to easily allow for additional theme colors
-  // static const DarkMode = 'dark_mode';
-  // static const LightMode = 'light';
-
   final bool darkMode;
 
   ThemeData _themeLight = ThemeData(
-      // Define the default brightness and colors.
       brightness: Brightness.light,
       primaryColor: Colors.lightBlue[800],
       accentColor: Colors.cyan[600],
-
-      // Define the default font family.
       fontFamily: 'Ubuntu',
-
-      // Define the default TextTheme. Use this to specify the default
-      // text styling for headlines, titles, bodies of text, and more.
       textTheme: TextTheme(
         headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
         headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
@@ -25,25 +21,15 @@ class ThemeController {
       ));
 
   ThemeData _themeDark = ThemeData(
-      // Define the default brightness and colors.
       brightness: Brightness.dark,
       primaryColor: Colors.orange,
       accentColor: Colors.orange[800],
-
-      // Define the default font family.
       fontFamily: 'Ubuntu',
-
-      // Define the default TextTheme. Use this to specify the default
-      // text styling for headlines, titles, bodies of text, and more.
       textTheme: TextTheme(
         headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
         headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
         bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
       ));
-
-  // light mode
-
-  // dark mode
 
   ThemeController({this.darkMode: false});
 

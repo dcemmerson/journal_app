@@ -1,3 +1,8 @@
+/// filename: empty_journal.dart
+/// last modified: 08/03/2020
+/// description: Stateless wigdet only rendered by journal.dart when
+///   user has no journal entries in database.
+
 import 'package:flutter/material.dart';
 
 class EmptyJournal extends StatelessWidget {

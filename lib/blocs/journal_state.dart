@@ -1,3 +1,8 @@
+/// filename: journal_state.dart
+/// last modified: 08/03/2020
+/// description: Journal state management. We use an inherited wigdget
+///   with a stateful widget to manage the state of the journal mobile app.
+
 import 'package:flutter/material.dart';
 import 'package:journal/blocs/journal_bloc.dart';
 import 'package:journal/services/journal_service.dart';
@@ -29,7 +34,6 @@ class JournalState extends State<JournalStateContainer> {
 
   set selectedIndex(int index) => setState(() {
         _selectedIndex = index;
-        print('setting state ' + index.toString());
       });
 
   @override

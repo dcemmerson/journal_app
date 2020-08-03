@@ -1,4 +1,9 @@
+/// filename: main.dart
+/// last modified: 08/03/2020
+/// description: Entry point for Journal mobile application.
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:journal/blocs/journal_bloc.dart';
 import 'package:journal/blocs/journal_state.dart';
 import 'package:journal/routes/routes.dart';
@@ -9,6 +14,14 @@ import 'database/journal_database_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.portraitUp
+  ]);
+
   await JournalDatabaseController.init();
 
   var journalService =
@@ -27,7 +40,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-//      home: MyHomePage(title: 'Flutter Demo Home Page'),
       routes: Routes.routes,
       initialRoute: Journal.route,
     );

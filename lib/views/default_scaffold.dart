@@ -1,3 +1,9 @@
+/// filename: default_scaffold.dart
+/// last modified: 08/03/2020
+/// description: Default scaffold used in journal app. Provides theme change
+///   user interface, floating action button to add new entries, etc. Pass
+///   in the title and child when using DefaultScaffold.
+
 import 'package:flutter/material.dart';
 import 'package:journal/theme/theme_controller.dart';
 import 'package:journal/theme/theme_drawer.dart';
@@ -20,10 +26,13 @@ class DefaultScaffold extends StatefulWidget {
 
 class _DefaultScaffoldState extends State<DefaultScaffold> {
   ThemeController themeController;
-
   void initState() {
     super.initState();
-    themeController = ThemeController(darkMode: darkMode);
+
+    //Initialize darkMode to false, since SharedPreferences is async,
+    // to prevent the build method from accessing themeController before
+    // SharedPreferences.getInstance() returns with previous settings.
+    themeController = ThemeController(darkMode: false);
     initThemeFlavor();
   }
 
@@ -34,8 +43,16 @@ class _DefaultScaffoldState extends State<DefaultScaffold> {
 
   void initThemeFlavor() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() =>
-        themeController = ThemeController(darkMode: prefs.getBool('darkMode')));
+    setState(() {
+      var darkMode = prefs.getBool('darkMode');
+      // Explicitly check truth value, to prevent comparison with null if this
+      // is the first time user is loading app. Eg, darkMode could be null here.
+      if (darkMode == true) {
+        themeController = ThemeController(darkMode: darkMode);
+      } else {
+        themeController = ThemeController(darkMode: false);
+      }
+    });
   }
 
   void toggleDarkMode() => setState(() {

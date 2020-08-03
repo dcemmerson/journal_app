@@ -1,3 +1,9 @@
+/// filename: journal_entry_form.dart
+/// last modified: 08/03/2020
+/// description: The entry form to create new journal entries for journal app.
+///   Form provides input validation, saving functionallity, and functionallity
+///   to prevent user changes from being lost.
+
 import 'package:flutter/material.dart';
 
 import 'package:journal/blocs/journal_bloc.dart';
@@ -173,13 +179,9 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
   /// Save/update and validation related
   void _persistEntry(BuildContext ctx) async {
     try {
-      print('saving...');
       widget._formKey.currentState.save();
-      print('saving...');
 
       if (widget.previousJdt != null) {
-        print('updating');
-
         _journalDatabaseTransfer.id = widget.previousJdt.id;
         _journalDatabaseTransfer.sort = widget.previousJdt.sort;
         // Then this entry exists in db and we are updating
@@ -191,8 +193,6 @@ class _JournalEntryFormState extends State<JournalEntryForm> {
             .add(UpdateJournalEntryEvent(_journalDatabaseTransfer));
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Updated!')));
       } else {
-        print('saving');
-
         // Else new entry we need to insert into db.
         Scaffold.of(ctx).showSnackBar(SnackBar(content: Text('Saving')));
         _journalDatabaseTransfer.sort = widget.entrySort;

@@ -1,3 +1,9 @@
+/// filename: journal_database_controller.dart
+/// last modified: 08/03/2020
+/// description: File manages connecting to sqflite database and performing
+///   database read, write, update, delete functionallities. Database instance
+///   is accessed using a factory constructor.
+
 import 'dart:async';
 
 import 'package:journal/database/journal_database_transfer.dart';
@@ -9,6 +15,7 @@ class JournalDatabaseController {
   static const _createJournalIfNotExists = 'createJournalIfNotExists';
   static const _selectAllJournalEntries = 'selectAllJournalEntries';
   static const _insertJournalEntry = 'insertJournalEntry';
+  static const _updateJournalEntrySort = 'updateJournalEntrySort';
   static const _tableName = 'journalEntries';
 
   static const jsonPath = 'assets/database/database_queries.json';
@@ -77,12 +84,21 @@ class JournalDatabaseController {
     journalChangeNotifier.add(await journalEntries);
   }
 
+  Future reorderJournalEntriesEvent(List<JournalDatabaseTransfer> jdts) async {
+    var awaitFutures = jdts
+        .map((JournalDatabaseTransfer jdt) => _db
+            .rawQuery(_dbQueries[_updateJournalEntrySort], [jdt.sort, jdt.id]))
+        .toList();
+
+    await Future.wait(awaitFutures);
+    journalChangeNotifier.add(await journalEntries);
+  }
+
   Future dropJournalTable() async {
     await _db.execute(_dbQueries[_dropJournalIfExists]);
   }
 
   Future createJournalTable() async {
-    print('creating table\n\n\n');
     return await _db.execute(_dbQueries[_createJournalIfNotExists]);
   }
 }

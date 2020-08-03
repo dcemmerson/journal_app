@@ -1,3 +1,9 @@
+/// filename: journal_bloc.dart
+/// last modified: 08/03/2020
+/// description: Business logic component for database input/output.
+///   This file handles connecting to the controller.dart files, turning
+///   database logic into streams.
+
 import 'dart:async';
 
 import 'package:journal/database/journal_database_transfer.dart';
@@ -14,8 +20,8 @@ class JournalBloc {
       StreamController<DeleteJournalEntryEvent>();
   StreamController<UpdateJournalEntryEvent> updateJournalEntrySink =
       StreamController<UpdateJournalEntryEvent>();
-  // StreamController<UpdateJournalEntryEvent> journalEntriesSink =
-  //     StreamController<UpdateJournalEntryEvent>();
+  StreamController<ReorderJournalEntriesEvent> reorderJournalEntriesSink =
+      StreamController<ReorderJournalEntriesEvent>();
 
   //outputs
   Stream<List<JournalDatabaseTransfer>> get journalEntries =>
@@ -31,7 +37,7 @@ class JournalBloc {
     addJournalEntrySink.stream.listen(_handleAddJournalEntry);
     deleteJournalEntrySink.stream.listen(_handleDeleteJournalEntry);
     updateJournalEntrySink.stream.listen(_handleUpdateJournalEntry);
-    // journalEntriesSink.stream.listen(_handleUpdateJournalEntry);
+    reorderJournalEntriesSink.stream.listen(_handleReorderJournalEntries);
 
     _service.journalEntries().listen(
         (List<JournalDatabaseTransfer> journalEntries) =>
@@ -53,10 +59,15 @@ class JournalBloc {
     _service.updateJournalEntry(updateJournalEntryEvent.jdt);
   }
 
+  void _handleReorderJournalEntries(ReorderJournalEntriesEvent rjee) {
+    _service.reorderJournalEntries(rjee.journalEntries);
+  }
+
   close() {
     addJournalEntrySink.close();
     deleteJournalEntrySink.close();
     updateJournalEntrySink.close();
+    reorderJournalEntriesSink.close();
     _journalEntriesStreamController.close();
     _journalEntryCountStreamController.close();
   }
@@ -75,4 +86,9 @@ class DeleteJournalEntryEvent {
 class UpdateJournalEntryEvent {
   final JournalDatabaseTransfer jdt;
   UpdateJournalEntryEvent(this.jdt);
+}
+
+class ReorderJournalEntriesEvent {
+  final List<JournalDatabaseTransfer> journalEntries;
+  ReorderJournalEntriesEvent(this.journalEntries);
 }

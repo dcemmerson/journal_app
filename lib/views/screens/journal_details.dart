@@ -1,3 +1,8 @@
+/// filename: journal_details.dart
+/// last_modified: 08/03/2020
+/// description: Stateless widget that sets up scaffold with title and inserts
+///   journal entry to be formatted for view by journal_entry_detail_view.
+
 import 'package:flutter/material.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 import 'package:journal/misc/helper.dart';

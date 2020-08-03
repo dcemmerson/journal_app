@@ -1,3 +1,7 @@
+/// filename: journal_service.dart
+/// last modified: 08/03/2020
+/// description: Provides access to journal database for journal bloc.
+
 import 'package:journal/database/journal_database_controller.dart';
 import 'package:journal/database/journal_database_transfer.dart';
 
@@ -9,6 +13,7 @@ abstract class JournalService {
   Future addJournalEntry(JournalDatabaseTransfer jdt);
   Future updateJournalEntry(JournalDatabaseTransfer jdt);
   Future deleteJournalEntry(int id);
+  Future reorderJournalEntries(List<JournalDatabaseTransfer> rjee);
 }
 
 class JournalDatabaseService implements JournalService {
@@ -35,5 +40,10 @@ class JournalDatabaseService implements JournalService {
   @override
   Future deleteJournalEntry(int id) async {
     return await journalDatabaseController.deleteJournalEntry(id);
+  }
+
+  @override
+  Future reorderJournalEntries(List<JournalDatabaseTransfer> jdts) async {
+    return await journalDatabaseController.reorderJournalEntriesEvent(jdts);
   }
 }

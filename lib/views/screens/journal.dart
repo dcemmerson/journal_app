@@ -1,3 +1,13 @@
+/// filename: journal.dart
+/// last modified: 08/03/2020
+/// description: Stateful widget that provides rendering for journal based
+///   on screen size/orientation. The only state that is kept track of here
+///   is which journal entry is selected. State object here also has reference
+///   to the number of journal entries count and journal bloc, but count is
+///   just used for making rendering decision, and journal bloc gives us access
+///   to the database streams and insert/update/delete sinks.
+///
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:journal/blocs/journal_bloc.dart';
@@ -26,7 +36,6 @@ class _JournalState extends State<Journal> {
 
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('depencencies changed');
     _bloc = JournalStateContainer.of(context).blocProvider.journalBloc;
     _selectedIndex = JournalStateContainer.of(context).selectedIndex;
   }
@@ -39,7 +48,6 @@ class _JournalState extends State<Journal> {
   }
 
   void goToDetailView(BuildContext context, JournalDatabaseTransfer jdt) {
-    // setSelectedJournalIndex(index);
     Routes.journalDetailView(context, journalEntry: jdt);
   }
 
