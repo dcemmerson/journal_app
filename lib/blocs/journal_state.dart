@@ -65,7 +65,6 @@ class _JournalContainer extends InheritedWidget {
   bool updateShouldNotify(_JournalContainer oldWidget) {
     return oldWidget.journalData != this.journalData ||
         oldWidget.selectedIndex != this.selectedIndex;
-    ;
   }
 }
 

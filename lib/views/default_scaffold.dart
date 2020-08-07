@@ -4,8 +4,6 @@ import 'package:journal/theme/theme_drawer.dart';
 import 'package:journal/theme/theme_drawer_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-bool darkMode = false;
-
 class DefaultScaffold extends StatefulWidget {
   final String title;
   final Widget child;
@@ -23,7 +21,7 @@ class _DefaultScaffoldState extends State<DefaultScaffold> {
 
   void initState() {
     super.initState();
-    themeController = ThemeController(darkMode: darkMode);
+    themeController = ThemeController(darkMode: false);
     initThemeFlavor();
   }
 
@@ -34,8 +32,10 @@ class _DefaultScaffoldState extends State<DefaultScaffold> {
 
   void initThemeFlavor() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() =>
-        themeController = ThemeController(darkMode: prefs.getBool('darkMode')));
+    bool isDarkMode = false;
+    if (prefs.getBool('darkMode') != null)
+      isDarkMode = prefs.getBool('darkMode');
+    setState(() => themeController = ThemeController(darkMode: isDarkMode));
   }
 
   void toggleDarkMode() => setState(() {
